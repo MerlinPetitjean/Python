@@ -1,0 +1,959 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "8c6f884d-8e91-4887-adbd-c938d5b0d12f",
+   "metadata": {},
+   "source": [
+    "# <center> Étude sur la compétitivité des ligues de haut niveau. </center>"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "92a6f893-668a-4f32-9e09-57c19bbf1e91",
+   "metadata": {},
+   "source": [
+    "## Intro"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dbd6c578-746a-48f9-8e64-95a5cc7276a9",
+   "metadata": {},
+   "source": [
+    "Je passe un temps excessif sur Reddit, en particulier sur le sous-forum r/soccer. Cette plateforme est majoritairement fréquentée par des utilisateurs américains et britanniques, et la Premier League (la ligue anglaise) y est le sujet le plus discuté. Au cours de la dernière décennie, la Liga espagnole était considérée comme la meilleure ligue de football au monde. Mais il était répété que, bien que La Liga puisse être techniquement supérieure, la Premier League était \"plus compétitive\".\n",
+    "\n",
+    "L'idée était que dans La Liga, la course au titre se résumait souvent au Real Madrid et au FC Barcelone, tandis qu'en Premier League, elle était plus variée. On avançait que, bien que les meilleures équipes de Premier League n'était pas aussi dominantes en europe, le niveau global de la compétition était plus uniformément réparti entre les équipes.\n",
+    "\n",
+    "Aujourd'hui, la Premier League est considérée à juste titre comme la meilleure ligue du monde. Cependant, la perception qu'elle est toujours la \"plus compétitive\" persiste. Ce sentiment semble souvent être basé sur des impressions subjectives plutôt que sur une analyse concrète, en particulier de la part de ceux qui suivent principalement cette même ligue. Cela m'a amené à me demander si nous pourrions utiliser des mesures mathématiques pour démontrer de manière objective le niveau de compétitivité dans les ligues de football."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "74bff436-50a7-4c0e-8b53-13c01db832fb",
+   "metadata": {},
+   "source": [
+    "## Competitive Level"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ba9d38fb",
+   "metadata": {},
+   "source": [
+    "Pour quantifier de manière objective la compétitivité relative entre deux ligues, on peut initialement comparer le nombre d'équipes distinctes ayant remporté la victoire sur une période spécifique, comme une décennie.\n",
+    "\n",
+    "Cependant, cette mesure unique pourrait s'avérer insuffisante. Par exemple, une ligue où une équipe gagne 9 fois et une autre seulement une fois produirait le même nombre de vainqueurs uniques qu'une ligue où deux équipes remportent chacune 5 victoires. Pourtant, le second scénario est plus compétitif.\n",
+    "\n",
+    "Une métrique statistique améliorée pourrait consister à examiner le nombre moyen de victoires remportées par les équipes championnes de la ligue. Dans le second exemple, cela se traduirait par une moyenne de 5 victoires dans les deux cas. Malgré cette amélioration, il reste peut-être des opportunités d'optimisation. L'intégration du concept d'écart-type dans l'analyse pourrait apporter un éclairage supplémentaire :"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "ec38170e-b08f-49b1-88ec-3ff905e923a1",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "import matplotlib as mat"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "268869af",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "4.0\n",
+      "0.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "LeagueA = [9,1]\n",
+    "LeagueB = [5,5]\n",
+    "print (np.std(LeagueA))\n",
+    "print (np.std(LeagueB))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "19b8358a",
+   "metadata": {},
+   "source": [
+    "L'écart-type apparaît comme une métrique à surveiller, elle nous permet de différencier entre la Ligue A et la Ligue B. \n",
+    "\n",
+    "Envisageons désormais un scénario où une troisième ligue (Ligue C) compte dix équipes, chacune remportant une seule victoire. Cette Ligue C incarne le niveau de compétitivité le plus élevé qu'une ligue puisse atteindre. Dans ce cas, l'écart-type serait nul, signifiant que si nous nous basions uniquement sur cette mesure, nous ne pourrions pas distinguer la Ligue C de la Ligue B.\n",
+    "\n",
+    "Cependant, la Ligue C afficherait une moyenne inférieure à celle de la Ligue B. Combiner l'écart-type et la moyenne pourrait potentiellement servir de métrique composite. Une valeur résultante plus basse suggérerait un plus grand nombre d'équipes victorieuses distinctes et une répartition des victoires plus équilibrée. Cette métrique combinée pourrait potentiellement offrir des éclairages précieux sur le paysage compétitif des ligues en question.\n",
+    "\n",
+    "Voyons cela à travers quelques exemples :"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "0b3bd47f",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "League A Competitive Level : 9.0\n",
+      "League B Competitive Level : 5.0\n",
+      "League C Competitive Level : 1.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "LeagueC=[1]*10\n",
+    "print (\"League A Competitive Level :\",np.std(LeagueA)+ np.mean(LeagueA))\n",
+    "print (\"League B Competitive Level :\",np.std(LeagueB)+ np.mean(LeagueB))\n",
+    "print (\"League C Competitive Level :\",np.std(LeagueC)+ np.mean(LeagueC))"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "02009784",
+   "metadata": {},
+   "source": [
+    "Cette approche semble prometteuse. Nous allons désigner cette métriquepar \"Competitive Level\". Un Competitive Level plus bas indique une ligue plus compétitive.\n",
+    "\n",
+    "Cependant, il est important de noter que la compétitivité d'une ligue ne se résume pas uniquement au vainqueur du trophée. Elle dépend également des équipes en compétition pour les places européennes de premier plan et de celles qui luttent pour éviter la relégation.\n",
+    "\n",
+    "Utiliser la moyenne des points gagnés au cours d'une saison pour l'ensemble de la ligue ne fournirait pas d'informations significatives dans ce contexte, car elle serait principalement influencée par le nombre de matchs nuls, qui accordent seulement 2 points par rapport aux 3 points attribués pour une victoire.\n",
+    "\n",
+    "En revanche, l'écart-type des points gagnés par match dans l'ensemble de la ligue s'avère être un indicateur intéressant. Un écart-type plus bas suggère une compétition plus équilibrée entre les équipes.\n",
+    "\n",
+    "Par conséquent, nous allons calculer :\n",
+    "\n",
+    "-Le Competitive Level du vainqueur.\n",
+    "\n",
+    "-Le Competitve Level des six meilleures équipes.\n",
+    "\n",
+    "-L'écart-type des points par match dans toute la ligue.\n",
+    "\n",
+    "Cette approche nous permettra de déterminer quelle ligue est la plus compétitive au cours de la dernière décennie."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "81d0ebae-67e5-4387-8ecf-5d56c6ba40b1",
+   "metadata": {},
+   "source": [
+    "Après avoir établi notre approche globale, il est crucial d'examiner de près les considérations spécifiques lors des comparaisons entre les ligues. Par exemple, il est sage d'écarter l'année anormalement impactée par la COVID-19 de notre analyse. Cela revêt une importance cruciale en raison des effets divers qu'elle a eus sur différentes ligues, tel que l'arrêt définitif des matchs dans des ligues comme la Ligue 1, contrairement à d'autres qui ont repris dans des conditions modifiées. Nous tiendrons compte de 10 années pour chaque ligue (les 11 dernières années moins celle de la COVID).\n",
+    "\n",
+    "De plus, il est nécessaire d'aborder la différence de nombre d'équipes entre les ligues. Les ligues n'adoptent pas toutes le même format ; certaines comptent 20 équipes, tandis que d'autres en ont 18. De plus, il existe des variations dans les systèmes de relégation, certaines ligues en appliquant 2, tandis que d'autres en ont 3, entre autres configurations.\n",
+    "\n",
+    "Il est important de noter que ces subtilités ne posent pas beaucoup de problèmes pour des mesures telles que le niveau de compétitivité, car elles concernent exclusivement les équipes classées en première position et les six meilleures équipes. De même, l'écart-type des points par match dans toute la ligue est calculé sur une base par match, ce qui rend les différences de taille de la ligue relativement peu pertinentes dans ce contexte. Cependant, il est évident qu'une disparité trop marquée (comme une ligue avec 10 équipes) aura manifestement un impact sur le niveau de compétitivité des six meilleures équipes. Nous resterons donc vigilants vis-à-vis de ces valeurs aberrantes."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a48f2593",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "## Collecte de données : Data scraping de transfertmarkt\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5bc16a46-78c4-474a-b4e3-533d70043f99",
+   "metadata": {},
+   "source": [
+    "Transfertmarket est une plateforme largement reconnue dans la communauté des statisticiens du football. Ses données sont étendues, diversifiées et fiables. Cependant, malheureusement, elles ne sont pas disponibles dans un format simple tel qu'un fichier CSV. Par conséquent, nous devrons recourir à la technique du scraping de données."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "cd3c37f1",
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "ImportError",
+     "evalue": "cannot import name 'BeautifulSoupa' from 'bs4' (C:\\Users\\azzaa\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\bs4\\__init__.py)",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mImportError\u001b[0m                               Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[24], line 2\u001b[0m\n\u001b[0;32m      1\u001b[0m \u001b[38;5;28;01mimport\u001b[39;00m \u001b[38;5;21;01mrequests\u001b[39;00m\n\u001b[1;32m----> 2\u001b[0m \u001b[38;5;28;01mfrom\u001b[39;00m \u001b[38;5;21;01mbs4\u001b[39;00m \u001b[38;5;28;01mimport\u001b[39;00m BeautifulSoupa\n\u001b[0;32m      3\u001b[0m \u001b[38;5;28;01mimport\u001b[39;00m \u001b[38;5;21;01mpandas\u001b[39;00m \u001b[38;5;28;01mas\u001b[39;00m \u001b[38;5;21;01mpd\u001b[39;00m\n",
+      "\u001b[1;31mImportError\u001b[0m: cannot import name 'BeautifulSoupa' from 'bs4' (C:\\Users\\azzaa\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\bs4\\__init__.py)"
+     ]
+    }
+   ],
+   "source": [
+    "import requests\n",
+    "from bs4 import BeautifulSoupa\n",
+    "import pandas as pd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "bd3a2e94",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'BeautifulSoup' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[25], line 12\u001b[0m\n\u001b[0;32m     10\u001b[0m page\u001b[38;5;241m=\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mhttps://www.transfermarkt.fr/laliga/tabelle/wettbewerb/ES1?saison_id=20\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;241m+\u001b[39m\u001b[38;5;28mstr\u001b[39m(i)\n\u001b[0;32m     11\u001b[0m pageTree \u001b[38;5;241m=\u001b[39m requests\u001b[38;5;241m.\u001b[39mget(page, headers\u001b[38;5;241m=\u001b[39mheaders)\n\u001b[1;32m---> 12\u001b[0m pageSoup \u001b[38;5;241m=\u001b[39m \u001b[43mBeautifulSoup\u001b[49m(pageTree\u001b[38;5;241m.\u001b[39mcontent, \u001b[38;5;124m'\u001b[39m\u001b[38;5;124mhtml.parser\u001b[39m\u001b[38;5;124m'\u001b[39m)\n\u001b[0;32m     13\u001b[0m Team \u001b[38;5;241m=\u001b[39m pageSoup\u001b[38;5;241m.\u001b[39mfind_all(\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mtd\u001b[39m\u001b[38;5;124m\"\u001b[39m, {\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mclass\u001b[39m\u001b[38;5;124m\"\u001b[39m: \u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mno-border-links hauptlink\u001b[39m\u001b[38;5;124m\"\u001b[39m})\n\u001b[0;32m     14\u001b[0m Standing \u001b[38;5;241m=\u001b[39m pageSoup\u001b[38;5;241m.\u001b[39mfind_all(\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mtd\u001b[39m\u001b[38;5;124m\"\u001b[39m, {\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mclass\u001b[39m\u001b[38;5;124m\"\u001b[39m: \u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mrechts hauptlink\u001b[39m\u001b[38;5;124m\"\u001b[39m})\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'BeautifulSoup' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/laliga/tabelle/wettbewerb/ES1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Liga = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,\"League\" :\"Liga\",\"Season\": SeasonList})\n",
+    "Liga\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "64d65d8f",
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'BeautifulSoup' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[12], line 12\u001b[0m\n\u001b[0;32m     10\u001b[0m page\u001b[38;5;241m=\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mhttps://www.transfermarkt.fr/premier-league/tabelle/wettbewerb/GB1/saison_id/20\u001b[39m\u001b[38;5;124m\"\u001b[39m\u001b[38;5;241m+\u001b[39m\u001b[38;5;28mstr\u001b[39m(i)\n\u001b[0;32m     11\u001b[0m pageTree \u001b[38;5;241m=\u001b[39m requests\u001b[38;5;241m.\u001b[39mget(page, headers\u001b[38;5;241m=\u001b[39mheaders)\n\u001b[1;32m---> 12\u001b[0m pageSoup \u001b[38;5;241m=\u001b[39m \u001b[43mBeautifulSoup\u001b[49m(pageTree\u001b[38;5;241m.\u001b[39mcontent, \u001b[38;5;124m'\u001b[39m\u001b[38;5;124mhtml.parser\u001b[39m\u001b[38;5;124m'\u001b[39m)\n\u001b[0;32m     13\u001b[0m Team \u001b[38;5;241m=\u001b[39m pageSoup\u001b[38;5;241m.\u001b[39mfind_all(\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mtd\u001b[39m\u001b[38;5;124m\"\u001b[39m, {\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mclass\u001b[39m\u001b[38;5;124m\"\u001b[39m: \u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mno-border-links hauptlink\u001b[39m\u001b[38;5;124m\"\u001b[39m})\n\u001b[0;32m     14\u001b[0m Standing \u001b[38;5;241m=\u001b[39m pageSoup\u001b[38;5;241m.\u001b[39mfind_all(\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mtd\u001b[39m\u001b[38;5;124m\"\u001b[39m, {\u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mclass\u001b[39m\u001b[38;5;124m\"\u001b[39m: \u001b[38;5;124m\"\u001b[39m\u001b[38;5;124mrechts hauptlink\u001b[39m\u001b[38;5;124m\"\u001b[39m})\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'BeautifulSoup' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/premier-league/tabelle/wettbewerb/GB1/saison_id/20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Epl = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList, 'League': 'Epl',\"Season\": SeasonList})\n",
+    "Epl\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "90651ccd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/serie-a/tabelle/wettbewerb/IT1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Seriea = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'Seriea',\"Season\": SeasonList})\n",
+    "Seriea"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0d7248cd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/bundesliga/tabelle/wettbewerb/L1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Bdsl = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'Bdsl',\"Season\": SeasonList})\n",
+    "Bdsl"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e83d1ada",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/ligue-1/tabelle/wettbewerb/FR1/saison_id/20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "L1 = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'L1',\"Season\": SeasonList})\n",
+    "L1"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ab361fd7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/eredivisie/tabelle/wettbewerb/NL1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Eredi = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'Eredi',\"Season\": SeasonList})\n",
+    "Eredi"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "4b048f15",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (11,22):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/campeonato-brasileiro-serie-a/tabelle/wettbewerb/BRA1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Bra = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'Bra',\"Season\": SeasonList})\n",
+    "Bra"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "69024b2c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/super-lig/tabelle/wettbewerb/TR1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Turk = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'Turk',\"Season\": SeasonList})\n",
+    "Turk"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b2f0333f-3d2f-44ba-a4db-336d0c67b8ba",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (12,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/liga-portugal/tabelle/wettbewerb/PO1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Port = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'Port',\"Season\": SeasonList})\n",
+    "Port"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dd87510f-a0d6-4f2d-85e4-de6d738fd9a8",
+   "metadata": {},
+   "source": [
+    "L'analyse de l'Égypte revêt une particularité, car les deux premières années portaient sur une ligue divisée en deux parties. Par conséquent, nous avons omis ces deux premières années de notre processus d'analyse."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "ae720442-5dc2-42cd-864d-d40250fab4c8",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "headers = {'User-Agent': \n",
+    "           'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.106 Safari/537.36'}\n",
+    "TeamList = []\n",
+    "StandingList = []\n",
+    "PointsList=[]\n",
+    "SeasonList=[]\n",
+    "MatchsList=[]\n",
+    "for i in range (14,23):\n",
+    "    if i!=19:\n",
+    "        page=\"https://www.transfermarkt.fr/egyptian-premier-league/tabelle/wettbewerb/EGY1?saison_id=20\"+str(i)\n",
+    "        pageTree = requests.get(page, headers=headers)\n",
+    "        pageSoup = BeautifulSoup(pageTree.content, 'html.parser')\n",
+    "        Team = pageSoup.find_all(\"td\", {\"class\": \"no-border-links hauptlink\"})\n",
+    "        Standing = pageSoup.find_all(\"td\", {\"class\": \"rechts hauptlink\"})\n",
+    "        Points = pageSoup.find_all(\"td\", {\"class\": \"zentriert\"})\n",
+    "        Season='20'+str(i)\n",
+    "    \n",
+    "        for i in range(0,1+int(int(Points[1].text)/2)):\n",
+    "            TeamList.append(Team[i].text.strip('\\n').strip('\\xa0'))\n",
+    "            StandingList.append(int(Standing[i].text))\n",
+    "            PointsList.append(int(Points[8*i+7].text))\n",
+    "            SeasonList.append(Season)\n",
+    "            MatchsList.append(int(Points[8*i+1].text))\n",
+    "Egypt = pd.DataFrame({\"Team\":TeamList,\"Standing\":StandingList,'Points':PointsList,'Matchs':MatchsList,'League': 'Egypt',\"Season\": SeasonList})\n",
+    "Egypt"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "26d08cc5",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "All_league = pd.concat([Liga,Epl,Seriea,L1,Bra,Turk,Eredi,Bdsl,Port,Egypt])\n",
+    "\n",
+    "\n",
+    "\n",
+    "League_list=['Liga','Epl','Seriea','L1','Bra','Turk','Eredi','Bdsl','Port','Egypt']\n",
+    "Value_list=['Unique Winner', 'Complvl Winner', 'Unique Top 6', 'Complvl Top 6', 'Std All']\n",
+    "All_league"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ad35aaf2-20ad-477e-a366-c1fef7086cab",
+   "metadata": {},
+   "source": [
+    "## Calcule de nos indicateurs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "1438124d",
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'All_league' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[13], line 4\u001b[0m\n\u001b[0;32m      2\u001b[0m Complvl_winner\u001b[38;5;241m=\u001b[39m[]\n\u001b[0;32m      3\u001b[0m \u001b[38;5;28;01mfor\u001b[39;00m i \u001b[38;5;129;01min\u001b[39;00m \u001b[38;5;28mrange\u001b[39m(\u001b[38;5;241m0\u001b[39m,\u001b[38;5;241m10\u001b[39m):\n\u001b[1;32m----> 4\u001b[0m     Mask_wnr\u001b[38;5;241m=\u001b[39m(\u001b[43mAll_league\u001b[49m[\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mStanding\u001b[39m\u001b[38;5;124m'\u001b[39m]\u001b[38;5;241m==\u001b[39m\u001b[38;5;241m1\u001b[39m) \u001b[38;5;241m&\u001b[39m (All_league[\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mLeague\u001b[39m\u001b[38;5;124m'\u001b[39m]\u001b[38;5;241m==\u001b[39mLeague_list[i])\n\u001b[0;32m      5\u001b[0m     Unique_winner\u001b[38;5;241m.\u001b[39mappend(\u001b[38;5;28mlen\u001b[39m(All_league[Mask_wnr]\u001b[38;5;241m.\u001b[39mgroupby(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mTeam\u001b[39m\u001b[38;5;124m'\u001b[39m)\u001b[38;5;241m.\u001b[39mcount()))\n\u001b[0;32m      6\u001b[0m     Complvl_winner\u001b[38;5;241m.\u001b[39mappend(((np\u001b[38;5;241m.\u001b[39mstd(All_league[Mask_wnr]\u001b[38;5;241m.\u001b[39mgroupby(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mTeam\u001b[39m\u001b[38;5;124m'\u001b[39m)\u001b[38;5;241m.\u001b[39mcount(),axis\u001b[38;5;241m=\u001b[39m\u001b[38;5;241m0\u001b[39m)\u001b[38;5;241m+\u001b[39mnp\u001b[38;5;241m.\u001b[39mmean(All_league[Mask_wnr]\u001b[38;5;241m.\u001b[39mgroupby(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mTeam\u001b[39m\u001b[38;5;124m'\u001b[39m)\u001b[38;5;241m.\u001b[39mcount()))\u001b[38;5;241m.\u001b[39mdrop([\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mPoints\u001b[39m\u001b[38;5;124m'\u001b[39m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mMatchs\u001b[39m\u001b[38;5;124m'\u001b[39m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mLeague\u001b[39m\u001b[38;5;124m'\u001b[39m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mSeason\u001b[39m\u001b[38;5;124m'\u001b[39m]))\u001b[38;5;241m.\u001b[39mto_numpy())\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'All_league' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Unique_winner=[]\n",
+    "Complvl_winner=[]\n",
+    "for i in range(0,10):\n",
+    "    Mask_wnr=(All_league['Standing']==1) & (All_league['League']==League_list[i])\n",
+    "    Unique_winner.append(len(All_league[Mask_wnr].groupby('Team').count()))\n",
+    "    Complvl_winner.append(((np.std(All_league[Mask_wnr].groupby('Team').count(),axis=0)+np.mean(All_league[Mask_wnr].groupby('Team').count())).drop(['Points','Matchs','League','Season'])).to_numpy())\n",
+    "    Unique_winner[i]=float(Unique_winner[i])\n",
+    "    Complvl_winner[i]=float(Complvl_winner[i][0])\n",
+    "print(Unique_winner)\n",
+    "print(Complvl_winner)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "f5aede41",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'All_league' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[14], line 4\u001b[0m\n\u001b[0;32m      2\u001b[0m Complvl_top6\u001b[38;5;241m=\u001b[39m[]\n\u001b[0;32m      3\u001b[0m \u001b[38;5;28;01mfor\u001b[39;00m i \u001b[38;5;129;01min\u001b[39;00m \u001b[38;5;28mrange\u001b[39m(\u001b[38;5;241m0\u001b[39m,\u001b[38;5;241m10\u001b[39m):\n\u001b[1;32m----> 4\u001b[0m     Mask_top6\u001b[38;5;241m=\u001b[39m(\u001b[43mAll_league\u001b[49m[\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mStanding\u001b[39m\u001b[38;5;124m'\u001b[39m]\u001b[38;5;241m<\u001b[39m\u001b[38;5;241m7\u001b[39m) \u001b[38;5;241m&\u001b[39m (All_league[\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mLeague\u001b[39m\u001b[38;5;124m'\u001b[39m]\u001b[38;5;241m==\u001b[39mLeague_list[i])\n\u001b[0;32m      5\u001b[0m     Unique_top6\u001b[38;5;241m.\u001b[39mappend(\u001b[38;5;28mlen\u001b[39m(All_league[Mask_top6]\u001b[38;5;241m.\u001b[39mgroupby(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mTeam\u001b[39m\u001b[38;5;124m'\u001b[39m)\u001b[38;5;241m.\u001b[39mcount()))\n\u001b[0;32m      6\u001b[0m     Complvl_top6\u001b[38;5;241m.\u001b[39mappend(((np\u001b[38;5;241m.\u001b[39mstd(All_league[Mask_top6]\u001b[38;5;241m.\u001b[39mgroupby(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mTeam\u001b[39m\u001b[38;5;124m'\u001b[39m)\u001b[38;5;241m.\u001b[39mcount(),axis\u001b[38;5;241m=\u001b[39m\u001b[38;5;241m0\u001b[39m)\u001b[38;5;241m+\u001b[39mnp\u001b[38;5;241m.\u001b[39mmean(All_league[Mask_top6]\u001b[38;5;241m.\u001b[39mgroupby(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mTeam\u001b[39m\u001b[38;5;124m'\u001b[39m)\u001b[38;5;241m.\u001b[39mcount(),axis\u001b[38;5;241m=\u001b[39m\u001b[38;5;241m0\u001b[39m))\u001b[38;5;241m.\u001b[39mdrop([\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mPoints\u001b[39m\u001b[38;5;124m'\u001b[39m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mMatchs\u001b[39m\u001b[38;5;124m'\u001b[39m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mLeague\u001b[39m\u001b[38;5;124m'\u001b[39m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mSeason\u001b[39m\u001b[38;5;124m'\u001b[39m]))\u001b[38;5;241m.\u001b[39mto_numpy())\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'All_league' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Unique_top6=[]\n",
+    "Complvl_top6=[]\n",
+    "for i in range(0,10):\n",
+    "    Mask_top6=(All_league['Standing']<7) & (All_league['League']==League_list[i])\n",
+    "    Unique_top6.append(len(All_league[Mask_top6].groupby('Team').count()))\n",
+    "    Complvl_top6.append(((np.std(All_league[Mask_top6].groupby('Team').count(),axis=0)+np.mean(All_league[Mask_top6].groupby('Team').count(),axis=0)).drop(['Points','Matchs','League','Season'])).to_numpy())\n",
+    "    Unique_top6[i]=float(Unique_top6[i])\n",
+    "    Complvl_top6[i]=float(Complvl_top6[i][0])\n",
+    "print(Unique_top6)\n",
+    "print(Complvl_top6)\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "8a59bf27",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'All_league' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[15], line 4\u001b[0m\n\u001b[0;32m      2\u001b[0m \u001b[38;5;28;01mfor\u001b[39;00m i \u001b[38;5;129;01min\u001b[39;00m \u001b[38;5;28mrange\u001b[39m(\u001b[38;5;241m0\u001b[39m,\u001b[38;5;241m10\u001b[39m):\n\u001b[0;32m      3\u001b[0m     temp\u001b[38;5;241m=\u001b[39m[]\n\u001b[1;32m----> 4\u001b[0m     Mask_league\u001b[38;5;241m=\u001b[39m\u001b[43mAll_league\u001b[49m[\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mLeague\u001b[39m\u001b[38;5;124m'\u001b[39m]\u001b[38;5;241m==\u001b[39mLeague_list[i]\n\u001b[0;32m      5\u001b[0m     Std_all\u001b[38;5;241m.\u001b[39mappend(np\u001b[38;5;241m.\u001b[39mstd(All_league[Mask_league][\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mPoints\u001b[39m\u001b[38;5;124m'\u001b[39m]\u001b[38;5;241m/\u001b[39mAll_league[Mask_league][\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mMatchs\u001b[39m\u001b[38;5;124m'\u001b[39m]))\n\u001b[0;32m      6\u001b[0m     Std_all[i]\u001b[38;5;241m=\u001b[39m\u001b[38;5;28mfloat\u001b[39m(Std_all[i])\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'All_league' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Std_all=[]\n",
+    "for i in range(0,10):\n",
+    "    temp=[]\n",
+    "    Mask_league=All_league['League']==League_list[i]\n",
+    "    Std_all.append(np.std(All_league[Mask_league]['Points']/All_league[Mask_league]['Matchs']))\n",
+    "    Std_all[i]=float(Std_all[i])\n",
+    "print(Std_all)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "47f7f6bb-f539-4a73-bcf8-0a6018df71be",
+   "metadata": {},
+   "source": [
+    "\n",
+    "Afin de faciliter la compréhension, nous allons d'abord standardiser les valeurs. Ensuite, nous inverserons l'échelle, attribuant 1 à la plus grande compétitivité et 0 à la plus faible. Enfin, nous calculerons la moyenne de nos trois mesures : le niveau de compétitivité du vainqueur, le niveau de compétitivité des meilleurs et l'écart-type des points par match. Cette approche permet aux spectateurs de saisir rapidement le graphique, même sans une connaissance préalable de notre méthodologie.\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "50aef5b1",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'League_list' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[16], line 1\u001b[0m\n\u001b[1;32m----> 1\u001b[0m Result\u001b[38;5;241m=\u001b[39m pd\u001b[38;5;241m.\u001b[39mDataFrame({\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mLeague\u001b[39m\u001b[38;5;124m'\u001b[39m:\u001b[43mLeague_list\u001b[49m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mComplvl Winner\u001b[39m\u001b[38;5;124m'\u001b[39m:Complvl_winner,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mComplvl Top 6\u001b[39m\u001b[38;5;124m'\u001b[39m:Complvl_top6,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mStd All\u001b[39m\u001b[38;5;124m'\u001b[39m:Std_all})\n\u001b[0;32m      2\u001b[0m Value_list\u001b[38;5;241m=\u001b[39m[\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mComplvl Winner\u001b[39m\u001b[38;5;124m'\u001b[39m,\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mComplvl Top 6\u001b[39m\u001b[38;5;124m'\u001b[39m, \u001b[38;5;124m'\u001b[39m\u001b[38;5;124mStd All\u001b[39m\u001b[38;5;124m'\u001b[39m]\n\u001b[0;32m      3\u001b[0m Standing\u001b[38;5;241m=\u001b[39m\u001b[38;5;28mlist\u001b[39m(\u001b[38;5;28mrange\u001b[39m(\u001b[38;5;241m1\u001b[39m,\u001b[38;5;241m11\u001b[39m,\u001b[38;5;241m1\u001b[39m))\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'League_list' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Result= pd.DataFrame({'League':League_list,'Complvl Winner':Complvl_winner,'Complvl Top 6':Complvl_top6,'Std All':Std_all})\n",
+    "Value_list=['Complvl Winner','Complvl Top 6', 'Std All']\n",
+    "Standing=list(range(1,11,1))\n",
+    "\n",
+    "\n",
+    "for i in range(0,len(Value_list)):  \n",
+    "    temp=pd.DataFrame(Result.sort_values(by=Value_list[i],ascending=True)['League'])\n",
+    "    temp[Value_list[i]+' Standing']=Standing\n",
+    "    Result=Result.merge(temp,on='League')\n",
+    "for i in range (0, len(Value_list)):\n",
+    "    min=np.min(Result[Value_list[i]])\n",
+    "    max=np.max(Result[Value_list[i]])\n",
+    "    temp=pd.DataFrame(np.abs((Result[Value_list[i]]-max)/(max-min)))\n",
+    "    Result[Value_list[i]+' Normalized']=temp\n",
+    "    \n",
+    "Result['Final Average Normalized']=Result.iloc[:,8:11].mean(axis=1)\n",
+    "temp=pd.DataFrame(Result.sort_values(by='Final Average Normalized',ascending=False)['League'])\n",
+    "temp['Final Average'+' Standing']=Standing\n",
+    "Result=Result.merge(temp,on='League')\n",
+    "Result['Leagueplot']=['LaLiga','Premier League','Serie A','Ligue 1','Brasileirão','SüperLig','Eredivise','Bundesliga','Liga Portugal','Egyptian Premier League']\n",
+    "Result\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a1958966-5b77-406c-9dec-5edbc21869ee",
+   "metadata": {},
+   "source": [
+    "## Présentation Visuelle de nos Résultats"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "09ce1b8a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import matplotlib.pyplot as plt\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "b30bb200",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'Result' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[18], line 1\u001b[0m\n\u001b[1;32m----> 1\u001b[0m Result_plot\u001b[38;5;241m=\u001b[39mpd\u001b[38;5;241m.\u001b[39mDataFrame(\u001b[43mResult\u001b[49m\u001b[38;5;241m.\u001b[39msort_values(by\u001b[38;5;241m=\u001b[39m\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mFinal Average Normalized\u001b[39m\u001b[38;5;124m'\u001b[39m,ignore_index\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m,ascending\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m))\n\u001b[0;32m      2\u001b[0m back\u001b[38;5;241m=\u001b[39mplt\u001b[38;5;241m.\u001b[39mimread(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mbra.jpg\u001b[39m\u001b[38;5;124m'\u001b[39m)\n\u001b[0;32m      3\u001b[0m fig, ax \u001b[38;5;241m=\u001b[39m plt\u001b[38;5;241m.\u001b[39msubplots()\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'Result' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Result_plot=pd.DataFrame(Result.sort_values(by='Final Average Normalized',ignore_index=True,ascending=True))\n",
+    "back=plt.imread('bra.jpg')\n",
+    "fig, ax = plt.subplots()\n",
+    "#ax.imshow(back,extent=[1,1])\n",
+    "ax.barh(Result_plot['Leagueplot'],Result_plot['Final Average Normalized'], label='Average Standing', align='center',color=['orange','black','orangered','royalblue','whitesmoke','forestgreen','red','xkcd:butter yellow'])\n",
+    "ax.set_title('Indice de Compétitivité des Ligues')\n",
+    "ax.set_xlabel('Moyennes de nos 3 métriques normalisées')\n",
+    "ax.set_facecolor('xkcd:light blue')\n",
+    "fig.patch.set_facecolor('xkcd:light blue')\n",
+    "plt.savefig('graph1',bbox_inches='tight',dpi=300)\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "de91b8b2",
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'Result' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[27], line 1\u001b[0m\n\u001b[1;32m----> 1\u001b[0m Result_plot\u001b[38;5;241m=\u001b[39mpd\u001b[38;5;241m.\u001b[39mDataFrame(\u001b[43mResult\u001b[49m\u001b[38;5;241m.\u001b[39msort_values(by\u001b[38;5;241m=\u001b[39m\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mComplvl Winner Normalized\u001b[39m\u001b[38;5;124m'\u001b[39m,ignore_index\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m,ascending\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m))\n\u001b[0;32m      2\u001b[0m back\u001b[38;5;241m=\u001b[39mplt\u001b[38;5;241m.\u001b[39mimread(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mbra.jpg\u001b[39m\u001b[38;5;124m'\u001b[39m)\n\u001b[0;32m      3\u001b[0m fig, ax \u001b[38;5;241m=\u001b[39m plt\u001b[38;5;241m.\u001b[39msubplots()\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'Result' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Result_plot=pd.DataFrame(Result.sort_values(by='Complvl Winner Normalized',ignore_index=True,ascending=True))\n",
+    "back=plt.imread('bra.jpg')\n",
+    "fig, ax = plt.subplots()\n",
+    "#ax.imshow(back,extent=[1,1])\n",
+    "ax.barh(Result_plot['Leagueplot'],Result_plot['Complvl Winner Normalized'], label='Average Standing', align='center',color=['black','forestgreen','royalblue','orange','orangered','whitesmoke','red','xkcd:butter yellow'])\n",
+    "ax.set_title('Titre le Plus Disputé')\n",
+    "ax.set_xlabel('Competitivity level du Champion (Std+mean) normalisé')\n",
+    "ax.set_facecolor('xkcd:light blue')\n",
+    "fig.patch.set_facecolor('xkcd:light blue')\n",
+    "plt.savefig('graph2',bbox_inches='tight',dpi=300)\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "30735682",
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'Result' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[28], line 1\u001b[0m\n\u001b[1;32m----> 1\u001b[0m Result_plot\u001b[38;5;241m=\u001b[39mpd\u001b[38;5;241m.\u001b[39mDataFrame(\u001b[43mResult\u001b[49m\u001b[38;5;241m.\u001b[39msort_values(by\u001b[38;5;241m=\u001b[39m\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mComplvl Top 6 Normalized\u001b[39m\u001b[38;5;124m'\u001b[39m,ignore_index\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m,ascending\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m))\n\u001b[0;32m      2\u001b[0m back\u001b[38;5;241m=\u001b[39mplt\u001b[38;5;241m.\u001b[39mimread(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mbra.jpg\u001b[39m\u001b[38;5;124m'\u001b[39m)\n\u001b[0;32m      3\u001b[0m fig, ax \u001b[38;5;241m=\u001b[39m plt\u001b[38;5;241m.\u001b[39msubplots()\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'Result' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Result_plot=pd.DataFrame(Result.sort_values(by='Complvl Top 6 Normalized',ignore_index=True,ascending=True))\n",
+    "back=plt.imread('bra.jpg')\n",
+    "fig, ax = plt.subplots()\n",
+    "#ax.imshow(back,extent=[1,1])\n",
+    "ax.barh(Result_plot['Leagueplot'],Result_plot['Complvl Top 6 Normalized'], label='Average Standing', align='center',color=['whitesmoke','orange','orangered','forestgreen','royalblue','black','red','xkcd:butter yellow'])\n",
+    "ax.set_title('Top 6 le Plus Disputé')\n",
+    "ax.set_xlabel('Competitivity level du Top 6 (Std+mean) normalisé')\n",
+    "ax.set_facecolor('xkcd:light blue')\n",
+    "fig.patch.set_facecolor('xkcd:light blue')\n",
+    "plt.savefig('graph3',bbox_inches='tight',dpi=300)\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "c1986592",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'module://matplotlib_inline.backend_inline'"
+      ]
+     },
+     "execution_count": 21,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "plt.get_backend()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "d29daef2",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "ename": "NameError",
+     "evalue": "name 'Result' is not defined",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mNameError\u001b[0m                                 Traceback (most recent call last)",
+      "Cell \u001b[1;32mIn[29], line 1\u001b[0m\n\u001b[1;32m----> 1\u001b[0m Result_plot\u001b[38;5;241m=\u001b[39mpd\u001b[38;5;241m.\u001b[39mDataFrame(\u001b[43mResult\u001b[49m\u001b[38;5;241m.\u001b[39msort_values(by\u001b[38;5;241m=\u001b[39m\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mStd All Normalized\u001b[39m\u001b[38;5;124m'\u001b[39m,ignore_index\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m,ascending\u001b[38;5;241m=\u001b[39m\u001b[38;5;28;01mTrue\u001b[39;00m))\n\u001b[0;32m      2\u001b[0m back\u001b[38;5;241m=\u001b[39mplt\u001b[38;5;241m.\u001b[39mimread(\u001b[38;5;124m'\u001b[39m\u001b[38;5;124mbra.jpg\u001b[39m\u001b[38;5;124m'\u001b[39m)\n\u001b[0;32m      3\u001b[0m fig, ax \u001b[38;5;241m=\u001b[39m plt\u001b[38;5;241m.\u001b[39msubplots()\n",
+      "\u001b[1;31mNameError\u001b[0m: name 'Result' is not defined"
+     ]
+    }
+   ],
+   "source": [
+    "Result_plot=pd.DataFrame(Result.sort_values(by='Std All Normalized',ignore_index=True,ascending=True))\n",
+    "back=plt.imread('bra.jpg')\n",
+    "fig, ax = plt.subplots()\n",
+    "#ax.imshow(back,extent=[1,1])\n",
+    "ax.barh(Result_plot['Leagueplot'],Result_plot['Std All Normalized'], label='Average Standing', align='center',color=['forestgreen','whitesmoke','orangered','orange','royalblue','black','red','xkcd:butter yellow'])\n",
+    "ax.set_title('Ligue la plus compacte')\n",
+    "ax.set_xlabel('Standard deviation des points par matchs normalisé')\n",
+    "ax.set_facecolor('xkcd:light blue')\n",
+    "fig.patch.set_facecolor('xkcd:light blue')\n",
+    "plt.savefig('graph5',bbox_inches='tight',dpi=300)\n",
+    "plt.show()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "25dd7bf2-edf7-47ed-a68f-4e53d5eedfc2",
+   "metadata": {},
+   "source": [
+    "## Conclusion"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cc88413f-0c60-40d2-8c14-2af4893c811b",
+   "metadata": {},
+   "source": [
+    "En résumé, notre analyse révèle que bien que les amateurs de la Premier League aient tendance à vanter leur ligue comme étant la meilleure et la plus disputée, notre analyse suggère une réalité différente. Il semble que le niveau de compétition ne soit pas aussi élevé qu'il est souvent proclamé. Si la diversité des vainqueurs constitue un point fort pour la Premier League, d'autres aspects méritent d'être soulignés. La prévisibilité du Top6 ainsi que la profondeur de la ligue dans son ensemble laissent place à des améliorations.\n",
+    "\n",
+    "Cela dit, si vous recherchez une ligue véritablement compétitive, le Brasileiro s'érige indiscutablement comme le choix privilégié. Cette ligue offre un mariage harmonieux entre un niveau de qualité et une compétition des plus féroces, créant ainsi un environnement propice à l'épanouissement du talent et à l'excitation des fans."
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.0"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
